@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
-<PageTitle>GoApp</PageTitle>
+@* <PageTitle>GoApp</PageTitle> *@
 
 <div class="page">
 	<style>
@@ -18,11 +18,14 @@
 			</a>
 
 			<ul class="nav nav-pills">
-				<li class="nav-item"><a href="https://advantshop.net/" class="nav-link" aria-current="page">Home</a></li>
+				<li class="nav-item"><a href="https://advantshop.net/" class="nav-link active" aria-current="page">Home</a></li>
 				<li class="nav-item"><a a href="/" class="nav-link">Товары</a></li>
 			</ul>
 		</header>
 		<div class="container container-fluid cs-bg-7 main-b-radius ">
+			<form class="col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
+				<input type="search" class="form-control form-control-light text-bg-light" placeholder="Поиск" aria-label="Search">
+			</form>
 			<div class="row body-content">
 				<div class="col-xs-3 col-p-v site-body-aside">
 					<nav class="h-auto menu-dropdown menu-dropdown-modern menu-dropdown-expanded">
@@ -38,5 +41,69 @@
 				</div>
 			</div>
 		</div>
+		<footer class="d-flex flex-wrap modal-footer rounded-bottom bg-primary-subtle align-content-center text-dark border rounded-3 border-bottom">
+			<section class="">
+				<div class="container text-center text-md-start mt-5">
+					<!-- Grid row -->
+					<div class="row mt-3">
+						<!-- Grid column -->
+						<div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
+							<!-- Content -->
+							<h6 class="text-uppercase fw-bold mb-4">
+								<i class="fas fa-gem me-3"></i>Описание сайта
+							</h6>
+							<p>
+								Это тестовая версия сайта,
+								она в данный момент находится в доработке :)
+							</p>
+						</div>
+						<!-- Grid column -->
+						<!-- Grid column -->
+						<div class="col-md-2 col-lg-2 col-xl-2 mx-auto mb-4">
+							<!-- Links -->
+							<h6 class="text-uppercase fw-bold mb-4">
+								Ссылки
+							</h6>
+							<p>
+								<a href="#!" class="text-reset">Ссылка №1</a>
+							</p>
+							<p>
+								<a href="#!" class="text-reset">Ссылка №2</a>
+							</p>
+							<p>
+								<a href="#!" class="text-reset">Ссылка №3</a>
+							</p>
+							<p>
+								<a href="#!" class="text-reset">Ссылка №4</a>
+							</p>
+						</div>
+						<!-- Grid column -->
+						<!-- Grid column -->
+						<div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4">
+							<!-- Links -->
+							<h6 class="text-uppercase fw-bold mb-4">
+								Еще пачка ссылок
+							</h6>
+							<p>
+								<a href="#!" class="text-reset">Ссылка №5</a>
+							</p>
+							<p>
+								<a href="#!" class="text-reset">Ссылка №6</a>
+							</p>
+							<p>
+								<a href="#!" class="text-reset">Ссылка №7</a>
+							</p>
+							<p>
+								<a href="#!" class="text-reset">Ссылка №8</a>
+							</p>
+						</div>
+						<!-- Grid column -->
+						<!-- Grid column -->
+					</div>
+					<!-- Grid row -->
+				</div>
+			</section>
+		</footer>
 	</div>
+	<script src="/_framework/aspnetcore-browser-refresh.js"></script>
 </div>

@@ -1,4 +1,7 @@
 ﻿@using GoApp.Pages
+@using System.Reflection
+@using System.Text.RegularExpressions
+
 <li>
 	<a class="dropdown-item dropdown-item-danger text-red d-flex gap-2 align-items-center">
 		
@@ -11,12 +14,15 @@
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
 	<nav class="flex-column text-decoration-none">
-		<li>
-			<a class="dropdown-item text-decoration-none dropdown-item-danger text-red d-flex gap-2 align-items-center" href="#">
-				<NavLink>Куртки</NavLink>
-			</a>
-		</li>
-		<li>
+		@foreach(var filename in GetRoutableComponentNamesForMenu())
+		{
+			<li>
+				<a class="dropdown-item text-decoration-none dropdown-item-danger text-red d-flex gap-2 align-items-center" href="@filename">
+					<NavLink>@filename</NavLink>
+				</a>
+			</li>
+		}
+		@* <li>
 			<a class="dropdown-item text-decoration-none dropdown-item-danger text-red d-flex gap-2 align-items-center" href="#">
 				<NavLink>Шапки</NavLink>
 			</a>
@@ -28,10 +34,10 @@
 		</li>
 		<li><hr class="dropdown-divider"></li>
 		<li>
-			<a class="dropdown-item text-decoration-none dropdown-item-danger text-red d-flex gap-2 align-items-center" href="index">
+			<a class="dropdown-item text-decoration-none dropdown-item-danger text-red d-flex gap-2 align-items-center" href="list">
 				<NavLink>Скидки</NavLink>
 			</a>
-		</li>
+		</li> *@
 	</nav>
 </div>
 
@@ -43,5 +49,28 @@
 	private void ToggleNavMenu()
 	{
 		collapseNavMenu = !collapseNavMenu;
+	}
+
+	public IEnumerable<string> GetRoutableComponentNamesForMenu()
+	{
+		var allComponents = Assembly
+			.GetExecutingAssembly()
+			.ExportedTypes
+			.Where(t => t.IsSubclassOf(typeof(ComponentBase)));
+
+		var routableComponents = allComponents
+			.Where(c => c
+				.GetCustomAttributes(inherit: true)
+				.OfType<RouteAttribute>()
+				.Count() > 0);
+
+
+		foreach (var routableComponent in routableComponents)
+		{
+			yield return routableComponent
+				.ToString()
+			// you need to adjust the following!
+				.Replace("GoApp.Pages.", string.Empty);
+		}
 	}
 }

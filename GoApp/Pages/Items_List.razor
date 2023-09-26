@@ -1,0 +1,68 @@
+﻿@using Microsoft.AspNetCore.Mvc.RazorPages
+@using Microsoft.EntityFrameworkCore
+@using GoApp.Entitys
+@using Microsoft.AspNetCore.Razor.Language.Intermediate
+@using BootstrapBlazor.Components
+@using GoApp
+@using GoApp.Db
+@inject IDbContextFactory<SqlDbContext> DbFactory
+
+@page "/items_list"
+<h3>Items_List</h3>
+
+<p>
+	<a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+	<thead>
+	<tr>
+		<th>
+			@nameof(Item.Name)
+		</th>
+		<th>
+			@nameof(Item.Description)
+		</th>
+		<th>
+				@nameof(Item.Category)
+		</th>
+		<th>
+				@nameof(Item.Customer)
+		</th>
+		<th></th>
+	</tr>
+	</thead>
+	<tbody>
+	@foreach (var item in items) {
+		<tr>
+			<td>
+				@(item.Name)
+			</td>
+			<td>
+				@item.Description
+			</td>
+			<td>
+				@item.Category.Name
+			</td>
+			<td>
+				@item.Customer
+			</td>
+			<td>
+				<a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
+				<a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
+				<a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+			</td>
+		</tr>
+	}
+	</tbody>
+</table>
+
+@code {
+	
+	List<Item> items;
+
+	protected override void OnInitialized()
+	{
+		using var context = DbFactory.CreateDbContext();
+		items = context.Items.AsNoTracking().ToList();
+	}
+}
