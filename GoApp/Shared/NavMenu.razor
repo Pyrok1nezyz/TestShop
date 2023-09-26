@@ -1,0 +1,47 @@
+﻿@using GoApp.Pages
+<li>
+	<a class="dropdown-item dropdown-item-danger text-red d-flex gap-2 align-items-center">
+		
+		<a title="Navigation menu" class="dropdown-item-danger text-decoration-none text-red" href="/" @onclick="ToggleNavMenu" >
+			<NavLink>Все товары</NavLink>
+		</a>
+	</a>
+</li>
+
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+	<nav class="flex-column text-decoration-none">
+		<li>
+			<a class="dropdown-item text-decoration-none dropdown-item-danger text-red d-flex gap-2 align-items-center" href="#">
+				<NavLink>Куртки</NavLink>
+			</a>
+		</li>
+		<li>
+			<a class="dropdown-item text-decoration-none dropdown-item-danger text-red d-flex gap-2 align-items-center" href="#">
+				<NavLink>Шапки</NavLink>
+			</a>
+		</li>
+		<li>
+			<a class="dropdown-item text-decoration-none dropdown-item-danger text-red d-flex gap-2 align-items-center" href="#">
+				<NavLink>Ботинки</NavLink>
+			</a>
+		</li>
+		<li><hr class="dropdown-divider"></li>
+		<li>
+			<a class="dropdown-item text-decoration-none dropdown-item-danger text-red d-flex gap-2 align-items-center" href="index">
+				<NavLink>Скидки</NavLink>
+			</a>
+		</li>
+	</nav>
+</div>
+
+@code {
+	private bool collapseNavMenu = true;
+
+	private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+	private void ToggleNavMenu()
+	{
+		collapseNavMenu = !collapseNavMenu;
+	}
+}
