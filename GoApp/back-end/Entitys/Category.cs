@@ -3,11 +3,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 namespace GoApp.Entitys;
-[Owned]
+[Table("Categories")]
 public class Category : BaseEntity
 {
 	[Key]
-	public int? Id { get; set; }
+	public int Id { get; set; }
 	public string Name { get; set; }
+	public string ImagePath { get; set; }
 	public ICollection<Item> Items { get; set; }
 }

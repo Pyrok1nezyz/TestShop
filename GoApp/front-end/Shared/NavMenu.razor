@@ -1,6 +1,8 @@
 ﻿@using GoApp.Pages
 @using System.Reflection
 @using System.Text.RegularExpressions
+@using GoApp.Entitys
+@inject IHttpClientFactory ClientFactory
 
 <li>
 	<a class="dropdown-item dropdown-item-danger text-red d-flex gap-2 align-items-center">
@@ -14,10 +16,10 @@
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
 	<nav class="flex-column text-decoration-none">
-		@foreach(var filename in GetRoutableComponentNamesForMenu())
+		@foreach(var category in categories)
 		{
 			<li>
-				<a class="dropdown-item text-decoration-none dropdown-item-danger text-red d-flex gap-2 align-items-center" href="@filename">
+				<a class="dropdown-item text-decoration-none dropdown-item-danger text-red d-flex gap-2 align-items-center" href="@c">
 					<NavLink>@filename</NavLink>
 				</a>
 			</li>
@@ -44,6 +46,8 @@
 @code {
 	private bool collapseNavMenu = true;
 
+	private List<Category> categories;
+
 	private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
 	private void ToggleNavMenu()
@@ -51,26 +55,15 @@
 		collapseNavMenu = !collapseNavMenu;
 	}
 
-	public IEnumerable<string> GetRoutableComponentNamesForMenu()
+	protected override void OnInitialized()
 	{
-		var allComponents = Assembly
-			.GetExecutingAssembly()
-			.ExportedTypes
-			.Where(t => t.IsSubclassOf(typeof(ComponentBase)));
+		var client = ClientFactory.CreateClient();
+		var response = client.GetAsync("https://localhost:7273/categories").Result;
 
-		var routableComponents = allComponents
-			.Where(c => c
-				.GetCustomAttributes(inherit: true)
-				.OfType<RouteAttribute>()
-				.Count() > 0);
-
-
-		foreach (var routableComponent in routableComponents)
+		if (response.IsSuccessStatusCode)
 		{
-			yield return routableComponent
-				.ToString()
-			// you need to adjust the following!
-				.Replace("GoApp.Pages.", string.Empty);
+			var content = response.Content.ReadFromJsonAsync<List<Category>>().Result;
+			categories = content;
 		}
 	}
 }

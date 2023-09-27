@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace GoApp.Entitys;
-
+[Owned, Table("Items")]
 public class Item : BaseEntity
 {
 	[Key]
