@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using GoApp.Data;
 using GoApp.Db;
 using GoApp.Db.Checks;
@@ -58,6 +60,50 @@ namespace GoApp
 				var categories = db.Categories.AsNoTracking().ToList();
 				return categories;
 			});
+
+			app.MapGet("/categoryitems", async (context) =>
+			{
+				if (!string.IsNullOrEmpty(context.Request.Query["Id"]))
+				{
+					var service = app.Services.GetService<IDbContextFactory<SqlDbContext>>();
+					var db = service.CreateDbContext();
+
+					var categoryIdQuery = context.Request.Query["Id"];
+					int categoryId = -1;
+					int.TryParse(categoryIdQuery, out categoryId);
+
+					var isFounded = db.Categories.Any(e => e.Id == categoryId);
+					if (isFounded)
+					{
+						context.Response.StatusCode = StatusCodes.Status200OK;
+						var list = db.Items.Where(e => e.CategoryId == categoryId).Include(e => e.Category).ToList();
+						await context.Response.WriteAsJsonAsync(list, new JsonSerializerOptions()
+						{
+							ReferenceHandler = ReferenceHandler.IgnoreCycles,
+							WriteIndented = true
+						});
+						return;
+					} 
+					else if (categoryId == 0)
+					{
+						context.Response.StatusCode = StatusCodes.Status200OK;
+						var list = db.Items.Include(e => e.Category).ToList();
+						await context.Response.WriteAsJsonAsync(list, new JsonSerializerOptions()
+						{
+							ReferenceHandler = ReferenceHandler.IgnoreCycles,
+							WriteIndented = true
+						});
+						return;
+					}
+				}
+
+				context.Response.Redirect("/");
+			});
+
+			//app.MapGet("/category", async context =>
+			//{
+			//	context.Response.Redirect("");
+			//})
 		
 			app.MapBlazorHub();
 			app.MapFallbackToPage("/_Host");

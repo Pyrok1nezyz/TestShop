@@ -7,53 +7,28 @@
 <li>
 	<a class="dropdown-item dropdown-item-danger text-red d-flex gap-2 align-items-center">
 		
-		<a title="Navigation menu" class="dropdown-item-danger text-decoration-none text-red" href="/" @onclick="ToggleNavMenu" >
+		<a title="Navigation menu" class="dropdown-item-danger text-decoration-none text-red" href="/">
 			<NavLink>Все товары</NavLink>
 		</a>
 	</a>
 </li>
 
 
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+<div class="nav-scrollable">
 	<nav class="flex-column text-decoration-none">
 		@foreach(var category in categories)
 		{
 			<li>
-				<a class="dropdown-item text-decoration-none dropdown-item-danger text-red d-flex gap-2 align-items-center" href="@c">
-					<NavLink>@filename</NavLink>
+				<a class="dropdown-item text-decoration-none dropdown-item-danger text-red d-flex gap-2 align-items-center" href="/category?id=@category.Id">
+					<NavLink>/category/@category.Name</NavLink>
 				</a>
 			</li>
 		}
-		@* <li>
-			<a class="dropdown-item text-decoration-none dropdown-item-danger text-red d-flex gap-2 align-items-center" href="#">
-				<NavLink>Шапки</NavLink>
-			</a>
-		</li>
-		<li>
-			<a class="dropdown-item text-decoration-none dropdown-item-danger text-red d-flex gap-2 align-items-center" href="#">
-				<NavLink>Ботинки</NavLink>
-			</a>
-		</li>
-		<li><hr class="dropdown-divider"></li>
-		<li>
-			<a class="dropdown-item text-decoration-none dropdown-item-danger text-red d-flex gap-2 align-items-center" href="list">
-				<NavLink>Скидки</NavLink>
-			</a>
-		</li> *@
 	</nav>
 </div>
 
 @code {
-	private bool collapseNavMenu = true;
-
 	private List<Category> categories;
-
-	private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-	private void ToggleNavMenu()
-	{
-		collapseNavMenu = !collapseNavMenu;
-	}
 
 	protected override void OnInitialized()
 	{

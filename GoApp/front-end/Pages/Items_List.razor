@@ -5,26 +5,27 @@
 @using BootstrapBlazor.Components
 @using GoApp
 @using GoApp.Db
+@using Microsoft.CodeAnalysis.Operations
 @using Microsoft.EntityFrameworkCore.Query
 @inject IHttpClientFactory ClientFactory
 
 @page "/items_list"
 
 <div class="row row-cols-1 row-cols-lg-2 text-light align-items-stretch g-4" data-bs-theme="light">
-@for(int i = 0; i < items.Count; i++)
+@for(int i = 0; i < Items.Count; i++)
 {
 	@if(i % 2 != 1)
 	{
 		<div class="col">
-			<div class="card card-cover h-100 overflow-hidden bg-dark text-bg-muted rounded-4 shadow-lg" height="5" type="image/png" style="background-image: url('@items[i].ImageString'); background-size: cover;">
+			<div class="card card-cover h-100 overflow-hidden bg-dark text-bg-muted rounded-4 shadow-lg" height="5" type="image/png" style="background-image: url('@Items[i].ImageString'); background-size: cover;">
 				<div class="d-flex flex-column h-100 p-5 pb-3 text-light text-shadow-1">
-					<h3 class="pt-5 mt-5 mb-4 display-6 text-center lh-1 fw-bold">@items[i].Name</h3>
+					<h3 class="pt-5 mt-5 mb-4 display-6 text-center lh-1 fw-bold">@Items[i].Name</h3>
 					<ul class="d-flex list-unstyled mt-auto">
 						<li class="rounded d-flex align-items-left mx-auto">
 							<img src="https://advant-project.ru/pictures/product/middle/4484_middle.png" alt="Bootstrap" width="32" height="32" class="rounded-circle border border-white">
 						</li>
 							<li class="d-flex align-content-lg-center mx-auto">
-							<small>от @items[i].Price</small>
+							<small>от @Items[i].Price</small>
 						</li>
 							<li class="d-flex align-content-lg-center mx-auto">
 							<small> ₽</small>
@@ -36,15 +37,15 @@
 	}
 	else
 	{
-		<div class="card card-cover h-100 overflow-hidden bg-dark text-bg-muted rounded-4 shadow-lg" height="5" type="image/png" style="background-image: url('@items[i].ImageString'); background-size: cover;">
+		<div class="card card-cover h-100 overflow-hidden bg-dark text-bg-muted rounded-4 shadow-lg" height="5" type="image/png" style="background-image: url('@Items[i].ImageString'); background-size: cover;">
 			<div class="d-flex flex-column h-100 p-5 pb-3 text-light text-shadow-1">
-				<h3 class="pt-5 mt-5 mb-4 display-6 lh-1 fw-bold">@items[i].Name</h3>
+				<h3 class="pt-5 mt-5 mb-4 display-6 lh-1 fw-bold">@Items[i].Name</h3>
 				<ul class="d-flex list-unstyled mt-auto">
 					<li class="rounded d-flex align-items-left mx-auto">
 						<img src="https://advant-project.ru/pictures/product/middle/4484_middle.png" alt="Bootstrap" width="32" height="32" class="rounded-circle border border-white">
 					</li>
 					<li class="d-flex align-content-lg-center mx-auto">
-						<small>от @items[i].Price</small>
+						<small>от @Items[i].Price</small>
 					</li>
 					<li class="d-flex align-content-lg-center mx-auto">
 						<small> ₽</small>
@@ -58,7 +59,7 @@
 
 @code {
 	
-	List<Item> items;
+	List<Item> Items;
 
 	protected override void OnInitialized()
 	{
@@ -68,7 +69,7 @@
 		if (response.IsSuccessStatusCode)
 		{
 			var content = response.Content.ReadFromJsonAsync<List<Item>>().Result;
-			items = content;
+			Items = content;
 		}
 	}
 }
