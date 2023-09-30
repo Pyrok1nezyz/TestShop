@@ -1,0 +1,63 @@
+﻿@page "/itemview"
+@using GoApp.Entitys
+@using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal
+@using AspNetCore.BootstrapTagHelpers.Extensions
+@using System.Net
+@inject IHttpClientFactory ClientFactory
+@inject NavigationManager Navigation
+
+@if (IsFounded)
+{
+	//<h2 class="pb-2 text-light border-bottom">@Item.Name</h2>
+	<div class="card mb-3" style="width: auto;">
+		<div class="row no-gutters">
+			<div class="col-md-4">
+				<img src="@Item.ImageString" class="card-img" alt="...">
+			</div>
+			<div class="col-md-8">
+				<div class="card-body">
+					<h5 class="card-title">@Item.Name</h5>
+					<p class="card-text">@Item.Description</p>
+					<p class="card-text"><small class="text-muted">@Item.Price руб.</small></p>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+else
+{
+	<h2 class="pb-2 text-light">Поиск товара по Id = @Id ничего не нашёл! :(</h2>
+}
+
+@code {
+
+	[Parameter]
+	[SupplyParameterFromQuery(Name = "id")]
+	public int Id { get; set; } = 0;
+
+	Item Item;
+	bool IsFounded = true;
+
+	protected override void OnInitialized()
+	{
+		try
+		{
+			var client = ClientFactory.CreateClient();
+			var response = client.GetAsync($"https://localhost:7273/getitemview?id={Id}").Result;
+
+			if (response.IsSuccessStatusCode)
+			{
+				var content = response.Content.ReadFromJsonAsync<Item>().Result;
+				Item = content;
+			}
+			else if (response.StatusCode == HttpStatusCode.NotFound)
+			{
+				IsFounded = false;
+			}
+		}
+		catch
+		{
+			Navigation.NavigateTo("/", true);
+		}
+	}
+}

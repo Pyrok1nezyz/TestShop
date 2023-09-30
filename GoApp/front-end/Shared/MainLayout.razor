@@ -1,4 +1,6 @@
-﻿@inherits LayoutComponentBase
+﻿@using Microsoft.EntityFrameworkCore
+@inherits LayoutComponentBase
+@inject NavigationManager Navigation
 
 @* <PageTitle>GoApp</PageTitle> *@
 
@@ -24,16 +26,16 @@
 		</header>
 		<div class="container container-fluid cs-bg-7 main-b-radius ">
 			<form class="col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
-				<input type="search" class="form-control form-control-light text-bg-light" placeholder="Поиск" aria-label="Search">
+				<input type="search" class="form-control form-control-light text-bg-light" @bind-value:event="oninput" @bind-value="Query" @onkeypress="Callback" placeholder="Поиск" aria-label="Search"/>
 			</form>
 			<div class="row body-content">
 				<div class="col-xs-3 col-p-v site-body-aside">
 					<nav class="h-auto menu-dropdown menu-dropdown-modern menu-dropdown-expanded">
 						<div class="d-flex h-auto flex-column flex-md-row p-4 gap-4 py-md-5 align-items-xl-start justify-content-left">
-							<ul class="h-50 dropdown-menu position-relative top-0 d-grid gap-1 p-2 rounded-3 mx-0 shadow w-220px" data-bs-theme="light">
+							<ul class="h-50 dropdown-menu position-relative top-0 d-grid gap-1 p-2 rounded-3 mx-0 shadow" style="width: 250px;" data-bs-theme="light">
 								<NavMenu/>
 							</ul>
-							<article class="content px-4">
+							<article class="content px-4 pt-0">
 								@Body
 							</article>
 						</div>
@@ -107,3 +109,28 @@
 	</div>
 	<script src="/_framework/aspnetcore-browser-refresh.js"></script>
 </div>
+
+@code
+{
+	string Query = "";
+
+	private void Callback(KeyboardEventArgs obj)
+	{
+		Console.WriteLine(Query);
+
+		if (obj.Code is "Enter" or "NumpadEnter")
+		{
+			if (Query.StartsWith("!"))
+			{
+				var newQuery = Query.Substring(1);
+				Navigation.NavigateTo($"/search?q={newQuery}&sm=true");
+			}
+			else
+			{
+				Navigation.NavigateTo($"/search?q={Query}", true, true);
+			}
+		}
+	}
+}
+
+								

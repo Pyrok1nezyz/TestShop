@@ -1,26 +1,27 @@
 ﻿@using GoApp.Pages
-@using System.Reflection
 @using System.Text.RegularExpressions
 @using GoApp.Entitys
+@inject NavigationManager Navigation
 @inject IHttpClientFactory ClientFactory
 
+
+<form class="p-2 mb-2 bg-body-tertiary border-bottom">
+	<input type="search" class="form-control" value="@_categorySearchString" @oninput="Callback" autocomplete="false" placeholder="Поиск">
+</form>
 <li>
 	<a class="dropdown-item dropdown-item-danger text-red d-flex gap-2 align-items-center">
-		
-		<a title="Navigation menu" class="dropdown-item-danger text-decoration-none text-red" href="/">
+		<a title="Navigation menu" class="dropdown-item-danger text-decoration-none text-red pt-0" href="/category?id=0&name=Все товары">
 			<NavLink>Все товары</NavLink>
 		</a>
 	</a>
 </li>
-
-
 <div class="nav-scrollable">
 	<nav class="flex-column text-decoration-none">
-		@foreach(var category in categories)
+		@foreach(var category in _filteredCategories)
 		{
 			<li>
-				<a class="dropdown-item text-decoration-none dropdown-item-danger text-red d-flex gap-2 align-items-center" href="/category?id=@category.Id">
-					<NavLink>/category/@category.Name</NavLink>
+				<a class="dropdown-item text-decoration-none dropdown-item-danger text-red d-flex gap-2 align-items-center" href="/category?id=@category.Id&name=@category.Name">
+					<NavLink>@category.Name</NavLink>
 				</a>
 			</li>
 		}
@@ -28,7 +29,11 @@
 </div>
 
 @code {
-	private List<Category> categories;
+	private List<Category> Categories;
+
+	private List<Category> _filteredCategories;
+
+	string _categorySearchString = "";
 
 	protected override void OnInitialized()
 	{
@@ -38,7 +43,30 @@
 		if (response.IsSuccessStatusCode)
 		{
 			var content = response.Content.ReadFromJsonAsync<List<Category>>().Result;
-			categories = content;
+			Categories = content;
+			GetFilteredCategories("");
+		}
+		else
+		{
+			Navigation.NavigateTo("/Error", true);
+		}
+	}
+
+	private void Callback(ChangeEventArgs args)
+	{
+		_categorySearchString = args.Value.ToString();
+		GetFilteredCategories(_categorySearchString);
+	}
+
+	private void GetFilteredCategories(string query)
+	{
+		if (string.IsNullOrWhiteSpace(_categorySearchString))
+		{
+			_filteredCategories = Categories;
+		}
+		else
+		{
+			_filteredCategories = Categories.Where(e => e.Name.ToLower().Contains(_categorySearchString.ToLower())).ToList();
 		}
 	}
 }

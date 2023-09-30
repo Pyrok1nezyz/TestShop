@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using GoApp.back_end.Entitys;
 using GoApp.Data;
 using GoApp.Db;
 using GoApp.Db.Checks;
@@ -21,9 +22,11 @@ namespace GoApp
 			builder.Services.AddRazorPages(options => options.RootDirectory = "/front-end/Pages");
 			builder.Services.AddServerSideBlazor();
 			builder.Services.AddSingleton<WeatherForecastService>();
+			builder.Services.AddSingleton<CustomerShoppingCartService>();
+            builder.Services.AddHttpContextAccessor();
 
 			var connection = builder.Configuration.GetConnectionString("DefaultConnection");
-			builder.Services.AddDbContextFactory<SqlDbContext>(options =>
+            builder.Services.AddDbContextFactory<SqlDbContext>(options =>
 			{
 				options.UseSqlServer(connection);
 				options.EnableSensitiveDataLogging();
@@ -65,7 +68,7 @@ namespace GoApp
 			{
 				if (!string.IsNullOrEmpty(context.Request.Query["Id"]))
 				{
-					var service = app.Services.GetService<IDbContextFactory<SqlDbContext>>();
+					var service = context.RequestServices.GetService<IDbContextFactory<SqlDbContext>>();
 					var db = service.CreateDbContext();
 
 					var categoryIdQuery = context.Request.Query["Id"];
@@ -77,7 +80,9 @@ namespace GoApp
 					{
 						context.Response.StatusCode = StatusCodes.Status200OK;
 						var list = db.Items.Where(e => e.CategoryId == categoryId).Include(e => e.Category).ToList();
-						await context.Response.WriteAsJsonAsync(list, new JsonSerializerOptions()
+						var check = new EntitysChecks();
+						var checkedList = check.CheckErrorImagesInItemList(Environment.CurrentDirectory, list);
+						await context.Response.WriteAsJsonAsync(checkedList, new JsonSerializerOptions()
 						{
 							ReferenceHandler = ReferenceHandler.IgnoreCycles,
 							WriteIndented = true
@@ -88,7 +93,9 @@ namespace GoApp
 					{
 						context.Response.StatusCode = StatusCodes.Status200OK;
 						var list = db.Items.Include(e => e.Category).ToList();
-						await context.Response.WriteAsJsonAsync(list, new JsonSerializerOptions()
+						var check = new EntitysChecks();
+						var checkedList = check.CheckErrorImagesInItemList(Environment.CurrentDirectory, list);
+						await context.Response.WriteAsJsonAsync(checkedList, new JsonSerializerOptions()
 						{
 							ReferenceHandler = ReferenceHandler.IgnoreCycles,
 							WriteIndented = true
@@ -97,13 +104,78 @@ namespace GoApp
 					}
 				}
 
-				context.Response.Redirect("/");
+				//context.Response.Redirect("/");
 			});
 
-			//app.MapGet("/category", async context =>
-			//{
-			//	context.Response.Redirect("");
-			//})
+			app.MapGet("/searchitems", async (context) =>
+			{
+				if (!string.IsNullOrEmpty(context.Request.Query["q"]))
+				{
+					var service = context.RequestServices.GetService<IDbContextFactory<SqlDbContext>>();
+					var db = service.CreateDbContext();
+
+					var query = context.Request.Query["q"];
+					var strictMode = false;
+					bool.TryParse(context.Request.Query["sm"], out strictMode);
+
+					var isFounded = db.Items.Where(e => e.Name.Contains(query)).Count();
+					if (isFounded > 0 && strictMode)
+					{
+						context.Response.StatusCode = StatusCodes.Status200OK;
+						var list = db.Items.Where(e => e.Name.ToLower().StartsWith(query.ToString().ToLower())).Include(e => e.Category).ToList();
+						var check = new EntitysChecks();
+						var checkedList = check.CheckErrorImagesInItemList(Environment.CurrentDirectory, list);
+						await context.Response.WriteAsJsonAsync(checkedList, new JsonSerializerOptions()
+						{
+							ReferenceHandler = ReferenceHandler.IgnoreCycles,
+							WriteIndented = true
+						});
+						return;
+					}
+					else if (isFounded > 0)
+					{
+						context.Response.StatusCode = StatusCodes.Status200OK;
+						var list = db.Items.Where(e => e.Name.ToLower().Contains(query.ToString().ToLower())).Include(e => e.Category).ToList();
+						var check = new EntitysChecks();
+						var checkedList = check.CheckErrorImagesInItemList(Environment.CurrentDirectory, list);
+						await context.Response.WriteAsJsonAsync(checkedList, new JsonSerializerOptions()
+						{
+							ReferenceHandler = ReferenceHandler.IgnoreCycles,
+							WriteIndented = true
+						});
+						return;
+					}
+					else
+					{
+						context.Response.StatusCode = StatusCodes.Status404NotFound;
+						await context.Response.StartAsync();
+					}
+				}
+			});
+
+			app.MapGet("/getitemview", async (context) =>
+			{
+				if (!string.IsNullOrEmpty(context.Request.Query["id"]))
+				{
+					var service = context.RequestServices.GetService<IDbContextFactory<SqlDbContext>>();
+					var db = service.CreateDbContext();
+
+					var query = context.Request.Query["id"];
+					int queryItemId = -1;
+					int.TryParse(query, out queryItemId);
+					var founded = db.Items.Any(e => e.Id == queryItemId);
+					if (founded)
+					{
+						context.Response.StatusCode = StatusCodes.Status200OK;
+						var item = db.Items.Find(queryItemId);
+						await context.Response.WriteAsJsonAsync(item);
+						return;
+					}
+				}
+
+				context.Response.StatusCode = StatusCodes.Status404NotFound;
+				context.Response.StartAsync();
+			});
 		
 			app.MapBlazorHub();
 			app.MapFallbackToPage("/_Host");

@@ -1,0 +1,27 @@
+﻿@inject IHttpContextAccessor HttpContextAccessor
+
+<h3>ShoppingCart</h3>
+
+@code {
+
+	protected override void OnInitialized()
+	{
+		string query = "";
+		Guid userGuid;
+		var context = HttpContextAccessor.HttpContext;
+
+		var isFounded = context.Request.Cookies.TryGetValue("guid", out query);
+		var IsParsed = Guid.TryParse(query, out userGuid);
+
+		if (IsParsed)
+		{
+			context.Response.StartAsync();
+		}
+	}
+
+}
+
+///1) Доделать бек-енд корзины товаров, куки настроить
+///2) доделать фронт корзины товаров
+///3) Добавить ссылки на ItemView из категорий товаров и поиска
+///4) Привести в порядок проект
