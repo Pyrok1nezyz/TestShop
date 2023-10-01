@@ -1,17 +1,12 @@
-﻿using GoApp.back_end.Data;
-using GoApp.back_end.Entitys;
-using GoApp.Entitys;
-using Microsoft.AspNetCore.Http.Connections;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+﻿using Microsoft.EntityFrameworkCore;
 
-namespace GoApp.Db;
+namespace TestShop.Entitys;
 
 public class SqlDbContext : Microsoft.EntityFrameworkCore.DbContext
 {
-	public DbSet<Item> Items { get; set; }
-	public DbSet<Category> Categories { get; set; } 
-    public DbSet<CustomerShoppingCart> CustomersShoppingCart { get; set; }
+	public DbSet<Item> Items { get; set; } = null!;
+	public DbSet<Category> Categories { get; set; } = null!;
+	public DbSet<CustomerShoppingCart> CustomersShoppingCart { get; set; } = null!;
 	public SqlDbContext(DbContextOptions<SqlDbContext> options)
 		: base(options)
 	{
@@ -23,4 +18,5 @@ public class SqlDbContext : Microsoft.EntityFrameworkCore.DbContext
 		modelBuilder.Entity<Item>().HasOne(e => e.Category)
 			.WithMany().HasForeignKey(e => e.CategoryId);
 	}
+
 }

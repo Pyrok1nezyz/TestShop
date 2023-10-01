@@ -1,4 +1,5 @@
-﻿@page "/category"
+﻿@page "/"
+@page "/category"
 @using GoApp.Entitys
 @using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal
 @using AspNetCore.BootstrapTagHelpers.Extensions
@@ -12,7 +13,30 @@
 	{
 		@if (i % 2 != 1)
 		{
-			<div class="col">
+			<a class="link-body-emphasis text-decoration-none" href="/itemview?id=@Items[i].Id">
+				<div class="col">
+					<div class="card card-cover h-100 overflow-hidden bg-dark text-bg-muted rounded-4 shadow-lg" height="5" type="image/png" style="background-image: url('@Items[i].ImageString'); background-size: cover;">
+						<div class="d-flex flex-column h-100 p-5 pb-3 text-light text-shadow-1">
+							<h3 class="pt-5 mt-5 mb-4 display-6 text-center lh-1 fw-bold">@Items[i].Name</h3>
+							<ul class="d-flex list-unstyled mt-auto">
+								<li class="rounded d-flex align-items-left mx-auto">
+									<img src="https://advant-project.ru/pictures/product/middle/4484_middle.png" alt="Bootstrap" width="32" height="32" class="rounded-circle border border-white">
+								</li>
+								<li class="d-flex align-content-lg-center mx-auto">
+									<small>от @Items[i].Price</small>
+								</li>
+								<li class="d-flex align-content-lg-center mx-auto">
+									<small> ₽</small>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</a>
+		}
+		else
+		{
+			<a class="link-body-emphasis text-decoration-none" href="/itemview?id=@Items[i].Id">
 				<div class="card card-cover h-100 overflow-hidden bg-dark text-bg-muted rounded-4 shadow-lg" height="5" type="image/png" style="background-image: url('@Items[i].ImageString'); background-size: cover;">
 					<div class="d-flex flex-column h-100 p-5 pb-3 text-light text-shadow-1">
 						<h3 class="pt-5 mt-5 mb-4 display-6 text-center lh-1 fw-bold">@Items[i].Name</h3>
@@ -29,26 +53,7 @@
 						</ul>
 					</div>
 				</div>
-			</div>
-		}
-		else
-		{
-			<div class="card card-cover h-100 overflow-hidden bg-dark text-bg-muted rounded-4 shadow-lg" height="5" type="image/png" style="background-image: url('@Items[i].ImageString'); background-size: cover;">
-				<div class="d-flex flex-column h-100 p-5 pb-3 text-light text-shadow-1">
-					<h3 class="pt-5 mt-5 mb-4 display-6 lh-1 fw-bold">@Items[i].Name</h3>
-					<ul class="d-flex list-unstyled mt-auto">
-						<li class="rounded d-flex align-items-left mx-auto">
-							<img src="https://advant-project.ru/pictures/product/middle/4484_middle.png" alt="Bootstrap" width="32" height="32" class="rounded-circle border border-white">
-						</li>
-						<li class="d-flex align-content-lg-center mx-auto">
-							<small>от @Items[i].Price</small>
-						</li>
-						<li class="d-flex align-content-lg-center mx-auto">
-							<small> ₽</small>
-						</li>
-					</ul>
-				</div>
-			</div>
+			</a>
 		}
 	}
 </div>

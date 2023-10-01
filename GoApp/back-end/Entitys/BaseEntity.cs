@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GoApp.Entitys;
+namespace TestShop.Entitys;
 
 public class BaseEntity
 {

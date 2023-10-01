@@ -2,21 +2,30 @@
 using GoApp.back_end.Entitys;
 using GoApp.Entitys;
 
-namespace GoApp.back_end.Data
+namespace TestShop.Entitys
 {
     public class CustomerShoppingCart : BaseEntity
     {
         [Key]
-        public int Id { get; set; }
-        public Guid CustomerId { get; set; } = Guid.NewGuid();
-        public List<ItemCounter> ListItems { get; set; }
+        public Guid Id { get; set; }
+        public List<ItemCounter>? ListItems { get; set; }
 
-        public DateTime LastCheck { get; set; } = DateTime.Now;
-    }
+        public DateTime LastCheck { get; set; }
 
-    public class ItemCounter
-    {
-        private Item Item { get; set; }
-        private int Count { get; set; }
+        public class ItemCounter
+        {
+            [Key]
+            public int Id { get; set; }
+	        public Item Item { get; set; }
+	        public int Count { get; set; }
+        }
+
+        public CustomerShoppingCart()
+        {
+            Id = Guid.NewGuid();
+            LastCheck = DateTime.Now;
+        }
     }
 }
+
+    

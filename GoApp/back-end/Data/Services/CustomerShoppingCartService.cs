@@ -1,24 +1,26 @@
-﻿using GoApp;
+﻿using BootstrapBlazor.Components;
+using GoApp;
 using GoApp.back_end.Data;
 using GoApp.Db;
 using Microsoft.EntityFrameworkCore;
 using Timer = System.Timers.Timer;
 
-namespace GoApp.back_end.Entitys
+namespace TestShop.Entitys
 {
-    public class CustomerShoppingCartService
+	public class CustomerShoppingCartService
     {
         private static CustomerShoppingCartService instance;
         SqlDbContext dbContext;
         private int HoursIntervalBetweenEvents = 4;
-        static Timer timer;
+        private int DaysOfLiveCookies = 2;
+        Timer timer;
         public CustomerShoppingCartService(SqlDbContext dbContext)
         {
             this.dbContext = dbContext;
-            Timer = GetTimer();
+            this.timer = GetTimer();
         }
 
-        public Timer GetTimer()
+        private Timer GetTimer()
         {
             var timer = new System.Timers.Timer( 1*60*60 * 1000);
             timer.Elapsed += TimerEvent;
@@ -27,9 +29,14 @@ namespace GoApp.back_end.Entitys
             return timer;
         }
 
-        public void TimerEvent(object source, System.Timers.ElapsedEventArgs e)
+        private void TimerEvent(object source, System.Timers.ElapsedEventArgs e)
         {
-            dbContext.CustomersShoppingCart.Where(e => e.LastCheck.AddHours(HoursIntervalBetweenEvents) < DateTime.Now).ExecuteDelete();
+            dbContext.CustomersShoppingCart.Where(e => e.LastCheck.AddDays(2) < DateTime.Today).ExecuteDelete();
+        }
+
+        public double GetTimerCoolDown()
+        {
+	        return timer.Interval;
         }
     }
 }

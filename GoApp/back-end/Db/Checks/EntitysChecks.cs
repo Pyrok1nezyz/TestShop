@@ -1,6 +1,4 @@
-﻿using GoApp.Entitys;
-
-namespace GoApp.Db.Checks;
+﻿namespace TestShop.Entitys;
 
 public class EntitysChecks
 {
@@ -13,5 +11,14 @@ public class EntitysChecks
 		}
 
 		return newlist;
+	}
+
+	public Item CheckErrorImage(string rootFolder, Item item)
+	{
+		var newitem = item;
+
+		if (!File.Exists(rootFolder + "/wwwroot/" + item.ImageString)) item.ImageString = "images/Error.png";
+		
+		return item;
 	}
 }

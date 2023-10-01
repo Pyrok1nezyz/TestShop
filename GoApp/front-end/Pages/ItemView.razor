@@ -1,7 +1,5 @@
 ﻿@page "/itemview"
 @using GoApp.Entitys
-@using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal
-@using AspNetCore.BootstrapTagHelpers.Extensions
 @using System.Net
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager Navigation
@@ -19,6 +17,7 @@
 					<h5 class="card-title">@Item.Name</h5>
 					<p class="card-text">@Item.Description</p>
 					<p class="card-text"><small class="text-muted">@Item.Price руб.</small></p>
+					<a type="button" class="btn btn-primary align-bottom" href="/newcustomercard?id={Item.Id}">Добавить в корзину</a>
 				</div>
 			</div>
 		</div>
@@ -37,13 +36,14 @@ else
 
 	Item Item;
 	bool IsFounded = true;
+	HttpClient _client;
 
 	protected override void OnInitialized()
 	{
 		try
 		{
-			var client = ClientFactory.CreateClient();
-			var response = client.GetAsync($"https://localhost:7273/getitemview?id={Id}").Result;
+			_client = ClientFactory.CreateClient();
+			var response = _client.GetAsync($"https://localhost:7273/getitemview?id={Id}").Result;
 
 			if (response.IsSuccessStatusCode)
 			{
@@ -59,5 +59,10 @@ else
 		{
 			Navigation.NavigateTo("/", true);
 		}
+	}
+
+	private void Navigate()
+	{
+		Navigation.NavigateTo($"https://localhost:7273/newcustomercard?id={Item.Id}");
 	}
 }

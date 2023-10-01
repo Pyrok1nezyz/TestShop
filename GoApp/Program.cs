@@ -1,16 +1,10 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using GoApp.back_end.Entitys;
-using GoApp.Data;
-using GoApp.Db;
-using GoApp.Db.Checks;
-using GoApp.Entitys;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.Extensions.Primitives;
+using TestShop.Entitys;
 
-namespace GoApp
+namespace TestShop
 {
 	public class Program
 	{
@@ -18,15 +12,12 @@ namespace GoApp
 		{
 			var builder = WebApplication.CreateBuilder(args);
 
-			// Add services to the container.
 			builder.Services.AddRazorPages(options => options.RootDirectory = "/front-end/Pages");
 			builder.Services.AddServerSideBlazor();
-			builder.Services.AddSingleton<WeatherForecastService>();
-			builder.Services.AddSingleton<CustomerShoppingCartService>();
-            builder.Services.AddHttpContextAccessor();
+			builder.Services.AddHttpContextAccessor();
 
 			var connection = builder.Configuration.GetConnectionString("DefaultConnection");
-            builder.Services.AddDbContextFactory<SqlDbContext>(options =>
+			builder.Services.AddDbContextFactory<SqlDbContext>(options =>
 			{
 				options.UseSqlServer(connection);
 				options.EnableSensitiveDataLogging();
@@ -36,11 +27,9 @@ namespace GoApp
 
 			var app = builder.Build();
 
-			// Configure the HTTP request pipeline.
 			if (!app.Environment.IsDevelopment())
 			{
 				app.UseExceptionHandler("/Error");
-				// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 				app.UseHsts();
 			}
 
@@ -88,7 +77,7 @@ namespace GoApp
 							WriteIndented = true
 						});
 						return;
-					} 
+					}
 					else if (categoryId == 0)
 					{
 						context.Response.StatusCode = StatusCodes.Status200OK;
@@ -104,7 +93,8 @@ namespace GoApp
 					}
 				}
 
-				//context.Response.Redirect("/");
+				context.Response.StatusCode = StatusCodes.Status404NotFound;
+				context.Response.StartAsync();
 			});
 
 			app.MapGet("/searchitems", async (context) =>
@@ -166,9 +156,11 @@ namespace GoApp
 					var founded = db.Items.Any(e => e.Id == queryItemId);
 					if (founded)
 					{
+						var errorCheck = new EntitysChecks();
 						context.Response.StatusCode = StatusCodes.Status200OK;
-						var item = db.Items.Find(queryItemId);
-						await context.Response.WriteAsJsonAsync(item);
+						var item = db.Items.Include(e => e.Category).First(e => e.Id == queryItemId);
+						var checkedItem = errorCheck.CheckErrorImage(Environment.CurrentDirectory, item);
+						await context.Response.WriteAsJsonAsync(checkedItem);
 						return;
 					}
 				}
@@ -176,7 +168,118 @@ namespace GoApp
 				context.Response.StatusCode = StatusCodes.Status404NotFound;
 				context.Response.StartAsync();
 			});
-		
+
+			app.MapGet("/cart", async (context) =>
+			{
+				if (!string.IsNullOrEmpty(context.Request.Query["id"]))
+				{
+					var service = context.RequestServices.GetService<IDbContextFactory<SqlDbContext>>();
+					var db = service.CreateDbContext();
+
+					var query = context.Request.Query["id"];
+					int queryItemId = -1;
+					int.TryParse(query, out queryItemId);
+					var founded = db.Items.Any(e => e.Id == queryItemId);
+					if (founded)
+					{
+						context.Response.StatusCode = StatusCodes.Status200OK;
+						var item = db.CustomersShoppingCart.Find(queryItemId);
+						await context.Response.WriteAsJsonAsync(item);
+					}
+				}
+
+				context.Response.StatusCode = StatusCodes.Status404NotFound;
+			});
+
+			app.MapPost("/cart", async (context) =>
+			{
+				var service = context.RequestServices.GetService<IDbContextFactory<SqlDbContext>>();
+				var db = service.CreateDbContext();
+
+				var cart = await context.Request.ReadFromJsonAsync<CustomerShoppingCart>();
+				var isFounded = db.CustomersShoppingCart.Any(e => e.Id == cart.Id);
+				if (!isFounded)
+				{
+					db.CustomersShoppingCart.Add(cart);
+					db.SaveChangesAsync();
+				}
+			});
+
+			app.MapPut("/cart", async (context) =>
+			{
+				var service = context.RequestServices.GetService<IDbContextFactory<SqlDbContext>>();
+				var db = service.CreateDbContext();
+
+				var cart = await context.Request.ReadFromJsonAsync<CustomerShoppingCart>();
+				var isFounded = db.CustomersShoppingCart.Any(e => e.Id == cart.Id);
+				if (isFounded)
+				{
+					db.CustomersShoppingCart.Update(cart);
+					db.SaveChangesAsync();
+				}
+			});
+
+			app.MapGet("/newcustomercard", async (context) =>
+			{
+				var service = context.RequestServices.GetService<IDbContextFactory<SqlDbContext>>();
+				var db = service.CreateDbContext();
+				StringValues queryItemId;
+				int itemId;
+				
+
+				if (!context.Request.Query.TryGetValue("id", out queryItemId)) return;
+				int.TryParse(queryItemId, out itemId);
+				var item = db.Items.FirstOrDefault(e => e.Id == itemId);
+
+				string cookie;
+				Guid guidItem = Guid.NewGuid();
+				if (context.Request.Cookies.TryGetValue("guid", out cookie))
+				{
+					if (Guid.TryParse(cookie, out guidItem))
+					{
+						if (db.CustomersShoppingCart.Any(e => e.Id == guidItem))
+						{
+							var cart = db.CustomersShoppingCart.First(e => e.Id == guidItem);
+							if (!cart.ListItems.Any(e => e.Item.Id == itemId))
+							{
+								cart.LastCheck = DateTime.Now;
+								cart.ListItems.Add(new CustomerShoppingCart.ItemCounter()
+								{
+									Item = item,
+									Count = 1
+								});
+								db.CustomersShoppingCart.Update(cart);
+								db.SaveChangesAsync();
+
+								context.Response.Redirect("/shoppingcart");
+								return;
+							}
+							else
+							{
+								context.Response.Redirect("/shoppingcart");
+								return;
+							}
+						}
+					}
+				}
+
+				var itemCounter = new CustomerShoppingCart.ItemCounter()
+				{
+					Item = item,
+					Count = 1
+				};
+				var newCart = new CustomerShoppingCart()
+				{
+					Id = guidItem,
+					ListItems = new List<CustomerShoppingCart.ItemCounter>() { itemCounter }
+				};
+				db.CustomersShoppingCart.Add(newCart);
+				db.SaveChangesAsync();
+
+				context.Response.Cookies.Append("guid", newCart.Id.ToString());
+				context.Response.Redirect("/shoppingcart");
+			});
+
 			app.MapBlazorHub();
 			app.MapFallbackToPage("/_Host");
 

@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="front-end\Pages\ItemView.razor" />
     <Content Remove="wwwroot\images\CategoriesImages\botinok.png" />
     <Content Remove="wwwroot\images\CategoriesImages\kurtka.png" />
     <Content Remove="wwwroot\images\CategoriesImages\shapka.png" />
@@ -27,18 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="front-end\Pages\ItemView.razor" />
     <None Include="wwwroot\images\CategoriesImages\botinok.png" />
     <None Include="wwwroot\images\CategoriesImages\kurtka.png" />
     <None Include="wwwroot\images\CategoriesImages\shapka.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <UpToDateCheckInput Remove="front-end\Pages\ItemView.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="front-end\Pages\ItemView.razor" />
   </ItemGroup>
 
 </Project>

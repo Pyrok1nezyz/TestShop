@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace GoApp.Entitys;
+namespace TestShop.Entitys;
 [Table("Categories")]
 public class Category : BaseEntity
 {
