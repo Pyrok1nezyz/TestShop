@@ -17,7 +17,7 @@
 					<h5 class="card-title">@Item.Name</h5>
 					<p class="card-text">@Item.Description</p>
 					<p class="card-text"><small class="text-muted">@Item.Price руб.</small></p>
-					<a type="button" class="btn btn-primary align-bottom" href="/newcustomercard?id=@Item.Id">Добавить в корзину</a>
+					<a type="button" class="btn btn-primary align-bottom" href="/newitemtocustomercard?id=@Item.Id">Добавить в корзину</a>
 				</div>
 			</div>
 		</div>
@@ -63,6 +63,6 @@ else
 
 	private void Navigate()
 	{
-		Navigation.NavigateTo($"https://localhost:7273/newcustomercard?id={Item.Id}");
+		Navigation.NavigateTo($"https://localhost:7273/newitemtocustomercard?id={Item.Id}");
 	}
 }

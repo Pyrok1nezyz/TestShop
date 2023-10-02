@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
+using TestShop.back_end.Data.middlewares;
 using TestShop.Entitys;
 
 namespace TestShop
@@ -15,6 +16,7 @@ namespace TestShop
 			builder.Services.AddRazorPages(options => options.RootDirectory = "/front-end/Pages");
 			builder.Services.AddServerSideBlazor();
 			builder.Services.AddHttpContextAccessor();
+			builder.Services.AddScoped<CustomerShoppingCartService>();
 
 			var connection = builder.Configuration.GetConnectionString("DefaultConnection");
 			builder.Services.AddDbContextFactory<SqlDbContext>(options =>
@@ -38,6 +40,8 @@ namespace TestShop
 			app.UseStaticFiles();
 
 			app.UseRouting();
+
+			app.UseMiddleware<CookieCheckMiddleware>();
 
 			app.MapGet("/items", (SqlDbContext db) =>
 			{
@@ -169,15 +173,7 @@ namespace TestShop
 				context.Response.StartAsync();
 			});
 
-			app.MapGet("/cookies", async (context) =>
-			{
-				string cookies;
-				if (!context.Request.Cookies.TryGetValue("guid", out cookies))
-				{
-					context.Response.Cookies.Append("guid", Guid.NewGuid().ToString());
-				}
-				context.Response.Redirect("/shoppingcart");
-			});
+			///Корзина товаров
 
 			app.MapGet("/cart", async (context) =>
 			{
@@ -231,7 +227,7 @@ namespace TestShop
 				}
 			});
 
-			app.MapGet("/newcustomercard", async (context) =>
+			app.MapGet("/newitemtocustomercard", async (context) =>
 			{
 				var service = context.RequestServices.GetService<IDbContextFactory<SqlDbContext>>();
 				var db = service.CreateDbContext();
