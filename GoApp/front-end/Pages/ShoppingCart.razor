@@ -1,12 +1,10 @@
 ﻿@page "/shoppingcart"
-@using GoApp.back_end.Data
-@using GoApp.Entitys
-@using System.Net.Http.Headers
+@using TestShop.Entitys
 @inject IHttpContextAccessor HttpContextAccessor
 @inject IHttpClientFactory ClientFactory
 
 <section class="h-100 bg-light rounded-2">
-    <div class="container h-100 py-5">
+    <div class="container h-100 py-5" style="padding-right: unset; padding-left: unset;">
         <div class="row d-flex justify-content-center align-items-center h-100">
             <div class="col-10">
 
@@ -20,6 +18,7 @@
 			            @foreach (var itemCounter in Cart.ListItems)
 			            {
 				            var id = itemCounter.Item.Id;
+
 				            <div class="card rounded-3 mb-4">
 					            <div class="card-body p-4">
 						            <div class="row d-flex justify-content-between align-items-center">
@@ -27,24 +26,28 @@
 								            <img src="@itemCounter.Item.ImageString"
 								                 class="img-fluid rounded-3">
 							            </div>
+
 							            <div class="col-md-3 col-lg-3 col-xl-3">
 								            <p class="lead fw-normal mb-2">@itemCounter.Item.Name</p>
 							            </div>
-							            <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
+
+							            <div class="col-md-3 col-lg-3 col-xl-2 d-grid">
 								            <button class="btn btn-link px-2" @onclick="() => { DecreeseItemsCount(id); }">
-									            <i class="fas fa-minus"></i>
+									            <i class="fas fa-minus">-</i>
 								            </button>
 
 								            <input id="form1" min="0" name="quantity" value="@itemCounter.Count" type="number"
 								                   class="form-control form-control-sm" />
 
 								            <button class="btn btn-link px-2" @onclick="() => { IncreesItemsCount(id); }">
-									            <i class="fas fa-plus"></i>
+									            <i class="fas fa-plus">+</i>
 								            </button>
 							            </div>
+
 							            <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
 								            <h5 class="mb-0">@itemCounter.Item.Price руб.</h5>
 							            </div>
+
 							            <div class="col-md-1 col-lg-1 col-xl-1 text-end">
 								            <a @onclick="() => { DeleteItemFromCart(id); }" class="text-danger"><i class="fas fa-trash fa-lg"></i></a>
 							            </div>
@@ -54,8 +57,8 @@
 			            }
 				
 			            <div class="card flex-fill">
-				            <div class="card-body">
-					            <button @onclick="() => { PutShoppingCart(); }" type="button" class="btn btn-warning btn-block btn-lg">Сохранить</button>
+				            <div class="card-body d-grid">
+								<button @onclick="Callback" type="button" class="btn btn-warning btn-block btn-lg">Сохранить</button>
 				            </div>
 			            </div>
 		            }
@@ -75,12 +78,12 @@
 
 @code {
 
-	CustomerShoppingCart Cart;
-
-	HttpClient _client;
-    [Parameter]
+	[Parameter]
 	[SupplyParameterFromQuery(Name = "newitem")]
 	public int id { get; set; }
+
+	CustomerShoppingCart Cart;
+	HttpClient _client;
 
 	protected override void OnInitialized()
 	{
@@ -116,11 +119,6 @@
 		if (itemCounter.Count > 0) itemCounter.Count++;
 	}
 
-	// private Item GetItem(int id)
-	// {
-
-	// }
-
 	private CustomerShoppingCart GetShoppingCart(Guid guid)
 	{
 		var response = _client.GetAsync($"https://localhost:7273/cart?id={guid}").Result;
@@ -148,10 +146,9 @@
 		Cart.ListItems.Remove(item);
 	}
 
-	///1) Доделать бек-енд корзины товаров, куки настроить
-///2) доделать фронт корзины товаров
-///3) Добавить ссылки на ItemView из категорий товаров и поиска
-///4) Привести в порядок проект
-///5) Доделать сервис
+	private void Callback()
+	{
+		PutShoppingCart();
+	}
 }
 

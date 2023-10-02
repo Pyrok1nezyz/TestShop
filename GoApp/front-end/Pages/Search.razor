@@ -1,10 +1,10 @@
 ﻿@page "/search"
-@using GoApp.Entitys
+@using TestShop.Entitys
 @using System.Net
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager Navigation
 
-@if (IsFounded)
+@if (IsListItemsFounded)
 {
 	<h2 class="pb-2 text-light border-bottom">Поиск товаров по запросу "@Query"</h2>
 
@@ -76,25 +76,26 @@ else
 	[SupplyParameterFromQuery(Name = "sm")]
 	public bool IsStrictMode { get; set; } = false;
 
-	bool IsFounded = true;
+	bool IsListItemsFounded = true;
 
 	List<Item> Items;
+	HttpClient _client;
 
 	protected override void OnInitialized()
 	{
 		try
 		{
-			var client = ClientFactory.CreateClient();
-			var response = client.GetAsync($"https://localhost:7273/searchitems?q={Query}&sm={IsStrictMode}").Result;
+			_client = ClientFactory.CreateClient();
+			var response = _client.GetAsync($"https://localhost:7273/searchitems?q={Query}&sm={IsStrictMode}").Result;
 
 			if (response.IsSuccessStatusCode)
 			{
 				var content = response.Content.ReadFromJsonAsync<List<Item>>().Result;
 				Items = content;
 			}
-			else if (response.StatusCode == HttpStatusCode.NotFound)
+			else
 			{
-				IsFounded = false;
+				IsListItemsFounded = false;
 			}
 		}
 		catch

@@ -1,10 +1,10 @@
 ﻿@page "/itemview"
-@using GoApp.Entitys
+@using TestShop.Entitys
 @using System.Net
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager Navigation
 
-@if (IsFounded)
+@if (IsItemFounded)
 {
 	//<h2 class="pb-2 text-light border-bottom">@Item.Name</h2>
 	<div class="card mb-3" style="width: auto;">
@@ -17,7 +17,7 @@
 					<h5 class="card-title">@Item.Name</h5>
 					<p class="card-text">@Item.Description</p>
 					<p class="card-text"><small class="text-muted">@Item.Price руб.</small></p>
-					<a type="button" class="btn btn-primary align-bottom" href="/newcustomercard?id={Item.Id}">Добавить в корзину</a>
+					<a type="button" class="btn btn-primary align-bottom" href="/newcustomercard?id=@Item.Id">Добавить в корзину</a>
 				</div>
 			</div>
 		</div>
@@ -35,7 +35,7 @@ else
 	public int Id { get; set; } = 0;
 
 	Item Item;
-	bool IsFounded = true;
+	bool IsItemFounded = true;
 	HttpClient _client;
 
 	protected override void OnInitialized()
@@ -52,7 +52,7 @@ else
 			}
 			else if (response.StatusCode == HttpStatusCode.NotFound)
 			{
-				IsFounded = false;
+				IsItemFounded = false;
 			}
 		}
 		catch

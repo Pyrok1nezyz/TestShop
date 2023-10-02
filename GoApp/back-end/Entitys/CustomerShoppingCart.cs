@@ -1,6 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using GoApp.back_end.Entitys;
-using GoApp.Entitys;
 
 namespace TestShop.Entitys
 {
@@ -9,18 +7,15 @@ namespace TestShop.Entitys
         [Key]
         public Guid Id { get; set; }
         public List<ItemCounter>? ListItems { get; set; }
-
         public DateTime LastCheck { get; set; }
-
-        public class ItemCounter
+        public class ItemCounter : BaseEntity
         {
-            [Key]
-            public int Id { get; set; }
+	        [Key]
+	        public int Id { get; set; }
 	        public Item Item { get; set; }
 	        public int Count { get; set; }
         }
-
-        public CustomerShoppingCart()
+		public CustomerShoppingCart()
         {
             Id = Guid.NewGuid();
             LastCheck = DateTime.Now;

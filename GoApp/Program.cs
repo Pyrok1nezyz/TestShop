@@ -169,6 +169,16 @@ namespace TestShop
 				context.Response.StartAsync();
 			});
 
+			app.MapGet("/cookies", async (context) =>
+			{
+				string cookies;
+				if (!context.Request.Cookies.TryGetValue("guid", out cookies))
+				{
+					context.Response.Cookies.Append("guid", Guid.NewGuid().ToString());
+				}
+				context.Response.Redirect("/shoppingcart");
+			});
+
 			app.MapGet("/cart", async (context) =>
 			{
 				if (!string.IsNullOrEmpty(context.Request.Query["id"]))
@@ -177,18 +187,20 @@ namespace TestShop
 					var db = service.CreateDbContext();
 
 					var query = context.Request.Query["id"];
-					int queryItemId = -1;
-					int.TryParse(query, out queryItemId);
-					var founded = db.Items.Any(e => e.Id == queryItemId);
+					Guid queryCartId;
+					Guid.TryParse(query, out queryCartId);
+					var founded = db.CustomersShoppingCart.Any(e => e.Id == queryCartId);
 					if (founded)
 					{
 						context.Response.StatusCode = StatusCodes.Status200OK;
-						var item = db.CustomersShoppingCart.Find(queryItemId);
+						var item = db.CustomersShoppingCart.Include(e => e.ListItems).ThenInclude(e => e.Item).ThenInclude(e => e.Category).First(e => e.Id == queryCartId);
 						await context.Response.WriteAsJsonAsync(item);
 					}
 				}
-
-				context.Response.StatusCode = StatusCodes.Status404NotFound;
+				else
+				{
+					context.Response.StatusCode = StatusCodes.Status404NotFound;
+				}
 			});
 
 			app.MapPost("/cart", async (context) =>
@@ -239,8 +251,8 @@ namespace TestShop
 					{
 						if (db.CustomersShoppingCart.Any(e => e.Id == guidItem))
 						{
-							var cart = db.CustomersShoppingCart.First(e => e.Id == guidItem);
-							if (!cart.ListItems.Any(e => e.Item.Id == itemId))
+							var cart = db.CustomersShoppingCart.Include(e => e.ListItems).ThenInclude(e => e.Item).First(e => e.Id == guidItem);
+							if (!cart.ListItems.Exists(e => e.Item.Id == itemId))
 							{
 								cart.LastCheck = DateTime.Now;
 								cart.ListItems.Add(new CustomerShoppingCart.ItemCounter()

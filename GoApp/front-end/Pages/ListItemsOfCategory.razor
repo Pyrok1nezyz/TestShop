@@ -1,8 +1,6 @@
 ﻿@page "/"
 @page "/category"
-@using GoApp.Entitys
-@using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal
-@using AspNetCore.BootstrapTagHelpers.Extensions
+@using TestShop.Entitys
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager Navigation
 
@@ -88,16 +86,17 @@
 	[Parameter]
 	[SupplyParameterFromQuery(Name = "page")]
 	public int CurrentPage { get; set; } = 0; 
+
 	public int CountOfPages;
-	public int CountItemsPerPage = 6;
-	public int NavigationPage = 1;
+	public int CountItemsPerPage = 4;
 
 	List<Item> Items;
+	HttpClient _client;
 
 	protected override void OnInitialized()
 	{
-		var client = ClientFactory.CreateClient();
-		var response = client.GetAsync($"https://localhost:7273/categoryitems?Id={CategoryId}").Result;
+		_client = ClientFactory.CreateClient();
+		var response = _client.GetAsync($"https://localhost:7273/categoryitems?Id={CategoryId}").Result;
 
 		if (response.IsSuccessStatusCode)
 		{

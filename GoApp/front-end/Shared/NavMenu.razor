@@ -1,6 +1,5 @@
-﻿@using GoApp.Pages
-@using System.Text.RegularExpressions
-@using GoApp.Entitys
+﻿@using System.Text.RegularExpressions
+@using TestShop.Entitys
 @inject NavigationManager Navigation
 @inject IHttpClientFactory ClientFactory
 
@@ -10,7 +9,7 @@
 </form>
 <li>
 	<a class="dropdown-item dropdown-item-danger text-red d-flex gap-2 align-items-center">
-		<a title="Navigation menu" class="dropdown-item-danger text-decoration-none text-red pt-0" href="/category?id=0&name=Все товары">
+		<a title="Navigation menu" class="dropdown-item-danger text-decoration-none text-red pt-0 w-50" href="/category?id=0&name=Все товары">
 			<NavLink>Все товары</NavLink>
 		</a>
 	</a>
