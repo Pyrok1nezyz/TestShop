@@ -5,12 +5,10 @@ namespace TestShop.Entitys
 {
 	public class CustomerShoppingCartService
     {
-        private static CustomerShoppingCartService _instance;
-        SqlDbContext _dbContext;
+	    readonly SqlDbContext _dbContext;
         Timer _timer;
 
 		private int HoursIntervalBetweenEvents = 4;
-        private int DaysOfLiveCookies = 2;
 
         public CustomerShoppingCartService(SqlDbContext dbContext)
         {
@@ -20,7 +18,7 @@ namespace TestShop.Entitys
 
         private Timer GetTimer()
         {
-            var timer = new System.Timers.Timer( 1*60*60 * 1000);
+            var timer = new System.Timers.Timer(HoursIntervalBetweenEvents * 60 * 60 * 1000);
             timer.Elapsed += TimerEvent;
             timer.AutoReset = true;
             timer.Enabled = true;

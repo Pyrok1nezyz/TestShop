@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Razor.Language.Intermediate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 using TestShop.back_end.Data.middlewares;
@@ -62,7 +63,7 @@ namespace TestShop
 				if (!string.IsNullOrEmpty(context.Request.Query["Id"]))
 				{
 					var service = context.RequestServices.GetService<IDbContextFactory<SqlDbContext>>();
-					var db = service.CreateDbContext();
+					var db = service!.CreateDbContext();
 
 					var categoryIdQuery = context.Request.Query["Id"];
 					int categoryId = -1;
@@ -98,7 +99,7 @@ namespace TestShop
 				}
 
 				context.Response.StatusCode = StatusCodes.Status404NotFound;
-				context.Response.StartAsync();
+				await context.Response.StartAsync();
 			});
 
 			app.MapGet("/searchitems", async (context) =>
@@ -106,11 +107,11 @@ namespace TestShop
 				if (!string.IsNullOrEmpty(context.Request.Query["q"]))
 				{
 					var service = context.RequestServices.GetService<IDbContextFactory<SqlDbContext>>();
-					var db = service.CreateDbContext();
+					var db = service!.CreateDbContext();
 
 					var query = context.Request.Query["q"];
 					var strictMode = false;
-					bool.TryParse(context.Request.Query["sm"], out strictMode);
+					if (!bool.TryParse(context.Request.Query["sm"], out strictMode) || !StringValues.IsNullOrEmpty(query)) return;
 
 					var isFounded = db.Items.Where(e => e.Name.Contains(query)).Count();
 					if (isFounded > 0 && strictMode)
@@ -152,7 +153,7 @@ namespace TestShop
 				if (!string.IsNullOrEmpty(context.Request.Query["id"]))
 				{
 					var service = context.RequestServices.GetService<IDbContextFactory<SqlDbContext>>();
-					var db = service.CreateDbContext();
+					var db = service!.CreateDbContext();
 
 					var query = context.Request.Query["id"];
 					int queryItemId = -1;
@@ -170,17 +171,17 @@ namespace TestShop
 				}
 
 				context.Response.StatusCode = StatusCodes.Status404NotFound;
-				context.Response.StartAsync();
+				await context.Response.StartAsync();
 			});
 
-			///Корзина товаров
+			///
 
 			app.MapGet("/cart", async (context) =>
 			{
 				if (!string.IsNullOrEmpty(context.Request.Query["id"]))
 				{
 					var service = context.RequestServices.GetService<IDbContextFactory<SqlDbContext>>();
-					var db = service.CreateDbContext();
+					var db = service!.CreateDbContext();
 
 					var query = context.Request.Query["id"];
 					Guid queryCartId;
@@ -202,44 +203,45 @@ namespace TestShop
 			app.MapPost("/cart", async (context) =>
 			{
 				var service = context.RequestServices.GetService<IDbContextFactory<SqlDbContext>>();
-				var db = service.CreateDbContext();
+				var db = service!.CreateDbContext();
 
 				var cart = await context.Request.ReadFromJsonAsync<CustomerShoppingCart>();
-				var isFounded = db.CustomersShoppingCart.Any(e => e.Id == cart.Id);
-				if (!isFounded)
+				var isFounded = db.CustomersShoppingCart.Any(e => cart != null && e.Id == cart.Id);
+				if (!isFounded && cart is not null)
 				{
 					db.CustomersShoppingCart.Add(cart);
-					db.SaveChangesAsync();
+					await db.SaveChangesAsync();
 				}
 			});
 
 			app.MapPut("/cart", async (context) =>
 			{
 				var service = context.RequestServices.GetService<IDbContextFactory<SqlDbContext>>();
-				var db = service.CreateDbContext();
+				var db = service!.CreateDbContext();
 
 				var cart = await context.Request.ReadFromJsonAsync<CustomerShoppingCart>();
-				var isFounded = db.CustomersShoppingCart.Any(e => e.Id == cart.Id);
-				if (isFounded)
+				var isFounded = db.CustomersShoppingCart.Any(e => cart != null && e.Id == cart.Id);
+				if (isFounded && cart is not null)
 				{
 					db.CustomersShoppingCart.Update(cart);
-					db.SaveChangesAsync();
+					await db.SaveChangesAsync();
 				}
 			});
 
 			app.MapGet("/newitemtocustomercard", async (context) =>
 			{
 				var service = context.RequestServices.GetService<IDbContextFactory<SqlDbContext>>();
-				var db = service.CreateDbContext();
+				var db = service!.CreateDbContext();
 				StringValues queryItemId;
 				int itemId;
 				
 
 				if (!context.Request.Query.TryGetValue("id", out queryItemId)) return;
-				int.TryParse(queryItemId, out itemId);
+				if (!int.TryParse(queryItemId, out itemId)) return;
 				var item = db.Items.FirstOrDefault(e => e.Id == itemId);
+				if(item is null) return;
 
-				string cookie;
+				string? cookie;
 				Guid guidItem = Guid.NewGuid();
 				if (context.Request.Cookies.TryGetValue("guid", out cookie))
 				{
@@ -248,7 +250,7 @@ namespace TestShop
 						if (db.CustomersShoppingCart.Any(e => e.Id == guidItem))
 						{
 							var cart = db.CustomersShoppingCart.Include(e => e.ListItems).ThenInclude(e => e.Item).First(e => e.Id == guidItem);
-							if (!cart.ListItems.Exists(e => e.Item.Id == itemId))
+							if (cart.ListItems != null && !cart.ListItems.Exists(e => e.Item.Id == itemId))
 							{
 								cart.LastCheck = DateTime.Now;
 								cart.ListItems.Add(new CustomerShoppingCart.ItemCounter()
@@ -257,7 +259,7 @@ namespace TestShop
 									Count = 1
 								});
 								db.CustomersShoppingCart.Update(cart);
-								db.SaveChangesAsync();
+								await db.SaveChangesAsync();
 
 								context.Response.Redirect("/shoppingcart");
 								return;
@@ -282,7 +284,7 @@ namespace TestShop
 					ListItems = new List<CustomerShoppingCart.ItemCounter>() { itemCounter }
 				};
 				db.CustomersShoppingCart.Add(newCart);
-				db.SaveChangesAsync();
+				await db.SaveChangesAsync();
 
 				context.Response.Cookies.Append("guid", newCart.Id.ToString());
 				context.Response.Redirect("/shoppingcart");

@@ -4,8 +4,8 @@
 @inject IHttpClientFactory ClientFactory
 
 
-<form class="p-2 mb-2 bg-body-tertiary border-bottom">
-	<input type="search" class="form-control" value="@_categorySearchString" @oninput="Callback" autocomplete="false" placeholder="Поиск">
+<form class="p-2 mb-2 bg-body-tertiary border-bottom w-100">
+	<input type="search" class="form-control w-100" value="@_categorySearchString" @oninput="Callback" autocomplete="false" placeholder="Поиск">
 </form>
 <li>
 	<a class="dropdown-item dropdown-item-danger text-red d-flex gap-2 align-items-center">

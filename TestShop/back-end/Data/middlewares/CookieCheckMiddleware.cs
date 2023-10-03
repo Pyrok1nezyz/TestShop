@@ -3,6 +3,7 @@
 public class CookieCheckMiddleware
 {
 	private readonly RequestDelegate next;
+	private int DaysOfLiveCookies = 2;
 
 	public CookieCheckMiddleware(RequestDelegate next)
 	{
@@ -23,7 +24,7 @@ public class CookieCheckMiddleware
 			{
 				var cookieOptions = new CookieOptions
 				{
-					Expires = DateTime.Now.AddHours(48)
+					Expires = DateTime.Now.AddDays(DaysOfLiveCookies)
 				};
 				context.Response.Cookies.Append("guid", Guid.NewGuid().ToString(), cookieOptions);
 			}
