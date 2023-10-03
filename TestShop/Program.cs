@@ -192,12 +192,11 @@ namespace TestShop
 						context.Response.StatusCode = StatusCodes.Status200OK;
 						var item = db.CustomersShoppingCart.Include(e => e.ListItems).ThenInclude(e => e.Item).ThenInclude(e => e.Category).First(e => e.Id == queryCartId);
 						await context.Response.WriteAsJsonAsync(item);
+						return;
 					}
 				}
-				else
-				{
-					context.Response.StatusCode = StatusCodes.Status404NotFound;
-				}
+
+				context.Response.StatusCode = StatusCodes.Status404NotFound;
 			});
 
 			app.MapPost("/cart", async (context) =>
