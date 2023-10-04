@@ -81,7 +81,7 @@
 
 	[Parameter]
 	[SupplyParameterFromQuery(Name = "name")]
-	public string CategoryName { get; set; } = "Все товары";
+	public string CategoryName { get; set; }
 
 	[Parameter]
 	[SupplyParameterFromQuery(Name = "page")]
@@ -112,6 +112,10 @@
 		}
 	}
 
+	protected override void OnParametersSet()
+	{
+		if (string.IsNullOrWhiteSpace(CategoryName)) CategoryName = "Все товары";
+	}
 
 	private void GoToPreviousPage()
 	{

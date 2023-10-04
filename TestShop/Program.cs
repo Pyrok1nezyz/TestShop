@@ -18,6 +18,7 @@ namespace TestShop
 			builder.Services.AddServerSideBlazor();
 			builder.Services.AddHttpContextAccessor();
 			builder.Services.AddScoped<CustomerShoppingCartService>();
+			builder.Services.AddControllers();
 
 			var connection = builder.Configuration.GetConnectionString("DefaultConnection");
 			builder.Services.AddDbContextFactory<SqlDbContext>(options =>
@@ -222,8 +223,43 @@ namespace TestShop
 				var isFounded = db.CustomersShoppingCart.Any(e => cart != null && e.Id == cart.Id);
 				if (isFounded && cart is not null)
 				{
-					db.CustomersShoppingCart.Update(cart);
-					await db.SaveChangesAsync();
+					var existingCart = db.CustomersShoppingCart.Include(e => e.ListItems).ThenInclude(e => e.Item)
+						.FirstOrDefault(e => e.Id == cart.Id);
+
+					if (existingCart != null)
+					{
+						// Обновление скалярных свойств
+						db.Entry(existingCart).CurrentValues.SetValues(cart);
+
+						// Обновление ListItems
+						foreach (var newItemCounter in cart.ListItems)
+						{
+							var existingItemCounter = existingCart.ListItems.FirstOrDefault(e => e.Id == newItemCounter.Id);
+
+							if (existingItemCounter != null)
+							{
+								// Обновление скалярных свойств ItemCounter
+								db.Entry(existingItemCounter).CurrentValues.SetValues(newItemCounter);
+							}
+							else
+							{
+								// Добавление нового ItemCounter
+								existingCart.ListItems.Add(newItemCounter);
+							}
+						}
+
+						// Удаление удаленных ListItems
+						foreach (var existingItemCounter in existingCart.ListItems.ToList())
+						{
+							if (!cart.ListItems.Any(e => e.Id == existingItemCounter.Id))
+							{
+								existingCart.ListItems.Remove(existingItemCounter);
+								db.Entry(existingItemCounter).State = EntityState.Deleted;
+							}
+						}
+
+						await db.SaveChangesAsync();
+					}
 				}
 			});
 
